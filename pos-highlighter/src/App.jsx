@@ -2532,6 +2532,7 @@ function MobileBar({
   unlocked,
   isManual,
   manualView,
+  autoView,
   selectedPos,
   onSelectPos,
   selectedStructure,
@@ -2540,8 +2541,9 @@ function MobileBar({
   lang,
 }) {
   const t = TRANSLATIONS[lang];
-  const showPOS = !isManual || (isManual && manualView === 'pos');
-  const showStructure = isManual && manualView === 'structure';
+  const showStructure = (isManual && manualView === 'structure')
+    || (!isManual && (autoView === 'structure' || autoView === 'both'));
+  const showPOS = !showStructure;
 
   if (showStructure) {
     const isBasic = level === 'Básico' || level === 'Elemental';
@@ -3369,6 +3371,7 @@ function App() {
         unlocked={unlocked}
         isManual={isManual}
         manualView={manualView}
+        autoView={autoView}
         selectedPos={selectedPos}
         onSelectPos={togglePos}
         selectedStructure={selectedStructure}

@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+:root {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+select {
+  appearance: auto;
+}
+
+textarea:focus {
+  outline: none;
+}
+
+/* Ruby labels above words */
+ruby {
+  ruby-align: center;
+}
+
+rt {
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  line-height: 1.1;
+}
+
+/* Yellow highlight animation for textarea when example loads */
+@keyframes highlightFlash {
+  0% { background-color: rgb(254 249 195); } /* yellow-100 */
+  100% { background-color: rgb(248 250 252); } /* slate-50 */
+}
+
+.highlight-flash {
+  animation: highlightFlash 0.6s ease-out;
+}

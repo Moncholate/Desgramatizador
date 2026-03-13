@@ -71,6 +71,11 @@ const TRANSLATIONS = {
       O: 'recibe la acción: ¿qué? / ¿a quién?',
       A: '¿cuándo? / ¿dónde? / ¿cómo?',
     },
+    // PWA banners
+    installBannerMsg: '📲 Instala la app en tu celular para usarla sin internet',
+    installBannerBtn: 'Instalar',
+    iosHintMsg: '📲 iPhone: toca Compartir → Agregar a pantalla de inicio',
+    offlineMsg: '⚠️ Sin conexión — la app sigue funcionando con el contenido cargado',
   },
   en: {
     appTitle: 'Desgramatizador',
@@ -137,6 +142,11 @@ const TRANSLATIONS = {
       O: 'receives the action: what? / whom?',
       A: 'when? / where? / how?',
     },
+    // PWA banners
+    installBannerMsg: '📲 Install this app on your phone for offline use',
+    installBannerBtn: 'Install',
+    iosHintMsg: '📲 iPhone: tap Share → Add to Home Screen to install',
+    offlineMsg: '⚠️ You are offline — the app still works with previously loaded content',
   },
 };
 
@@ -2896,9 +2906,9 @@ function App() {
       {/* ── PWA: Android install banner ── */}
       {showInstallBanner && (
         <div className="flex-shrink-0 bg-indigo-600 text-white px-4 py-2 flex items-center justify-between text-sm z-50">
-          <span>📲 Install this app on your phone for offline use</span>
+          <span>{t.installBannerMsg}</span>
           <div className="flex gap-2">
-            <button onClick={handleInstall} className="bg-white text-indigo-600 px-3 py-1 rounded font-medium">Install</button>
+            <button onClick={handleInstall} className="bg-white text-indigo-600 px-3 py-1 rounded font-medium">{t.installBannerBtn}</button>
             <button onClick={() => setShowInstallBanner(false)} className="text-white opacity-70 px-2">✕</button>
           </div>
         </div>
@@ -2906,14 +2916,14 @@ function App() {
       {/* ── PWA: iOS Safari hint ── */}
       {showIOSHint && (
         <div className="flex-shrink-0 bg-indigo-50 border-b border-indigo-200 text-indigo-800 px-4 py-2 text-sm flex items-center justify-between z-50">
-          <span>📲 iPhone: tap <strong>Share</strong> → <strong>Add to Home Screen</strong> to install</span>
+          <span>{t.iosHintMsg}</span>
           <button onClick={() => setShowIOSHint(false)} className="ml-2 opacity-60">✕</button>
         </div>
       )}
       {/* ── Offline indicator ── */}
       {!isOnline && (
         <div className="flex-shrink-0 bg-amber-50 border-b border-amber-300 text-amber-800 px-4 py-2 text-sm text-center z-50">
-          ⚠️ You are offline — the app still works with previously loaded content
+          {t.offlineMsg}
         </div>
       )}
       {/* ══ HEADER ══════════════════════════════════════════ */}

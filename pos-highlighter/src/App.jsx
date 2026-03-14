@@ -1994,7 +1994,7 @@ function StructurePalette({ level, selectedStructure, onSelectStructure, lang })
             >
               <div
                 className="w-7 h-7 rounded flex items-center justify-center text-xs font-extrabold"
-                style={{ background: s.color, color: 'white' }}
+                style={{ background: s.bg, color: s.color }}
               >
                 {s.label}
               </div>
@@ -2547,7 +2547,9 @@ function MobileBar({
 
   if (showStructure) {
     const isBasic = level === 'Básico' || level === 'Elemental';
-    const items = isBasic ? ['S', 'V', 'C'] : ['S', 'V', 'O', 'A'];
+    const items = isManual
+      ? (isBasic ? ['WH', 'S', 'V', 'C'] : ['WH', 'S', 'V', 'O', 'A'])
+      : (isBasic ? ['S', 'V', 'C'] : ['S', 'V', 'O', 'A']);
 
     return (
       <div className="md:hidden flex-shrink-0 bg-white border-t border-gray-200 z-30 shadow-[0_-2px_14px_rgba(0,0,0,0.08)]">

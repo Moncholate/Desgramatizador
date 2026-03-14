@@ -30,6 +30,7 @@ const TRANSLATIONS = {
     categoriesUnlocked: 'categorías desbloqueadas',
     painting: 'Pintando',
     selectCategory: 'Selecciona una categoría arriba',
+    levelLabel: 'Nivel',
     showLabels: 'Mostrar Etiquetas',
     hideLabels: 'Ocultar Etiquetas',
     clearAll: 'Limpiar Todo',
@@ -101,6 +102,7 @@ const TRANSLATIONS = {
     categoriesUnlocked: 'categories unlocked',
     painting: 'Painting',
     selectCategory: 'Select a category above',
+    levelLabel: 'Level',
     showLabels: 'Show Labels',
     hideLabels: 'Hide Labels',
     clearAll: 'Clear All',
@@ -2952,11 +2954,14 @@ function App() {
               <button onClick={() => setLang('es')} className={`px-3 py-1 rounded text-sm font-bold transition-all ${lang === 'es' ? 'bg-white shadow-sm text-indigo-600' : 'hover:bg-slate-50 text-slate-600'}`} title="Español">ES</button>
               <button onClick={() => setLang('en')} className={`px-3 py-1 rounded text-sm font-bold transition-all ${lang === 'en' ? 'bg-white shadow-sm text-indigo-600' : 'hover:bg-slate-50 text-slate-600'}`} title="English">EN</button>
             </div>
-            <select value={level} onChange={e => setLevel(e.target.value)} className="text-sm font-bold bg-indigo-50 border-indigo-200 border-[1.5px] text-indigo-800 rounded-lg px-3.5 py-1.5 cursor-pointer outline-none">
-              {['Básico', 'Elemental', 'Intermedio', 'Intermedio Alto'].map(l => (
-                <option key={l} value={l}>{l}</option>
-              ))}
-            </select>
+            <div className="flex flex-col items-start">
+              <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide px-1 mb-0.5">{t.levelLabel}</span>
+              <select value={level} onChange={e => setLevel(e.target.value)} className="text-sm font-bold bg-indigo-50 border-indigo-200 border-[1.5px] text-indigo-800 rounded-lg px-3.5 py-1.5 cursor-pointer outline-none">
+                {['Básico', 'Elemental', 'Intermedio', 'Intermedio Alto'].map(l => (
+                  <option key={l} value={l}>{l}</option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
 
@@ -2966,11 +2971,14 @@ function App() {
             <button onClick={() => setLang('es')} className={`px-3 py-1 rounded text-sm font-bold transition-all ${lang === 'es' ? 'bg-white shadow-sm text-indigo-600' : 'hover:bg-slate-50 text-slate-600'}`} title="Español">ES</button>
             <button onClick={() => setLang('en')} className={`px-3 py-1 rounded text-sm font-bold transition-all ${lang === 'en' ? 'bg-white shadow-sm text-indigo-600' : 'hover:bg-slate-50 text-slate-600'}`} title="English">EN</button>
           </div>
-          <select value={level} onChange={e => setLevel(e.target.value)} className="flex-1 text-sm font-bold bg-indigo-50 border-indigo-200 border-[1.5px] text-indigo-800 rounded-lg px-3 py-1.5 cursor-pointer outline-none">
-            {['Básico', 'Elemental', 'Intermedio', 'Intermedio Alto'].map(l => (
-              <option key={l} value={l}>{l}</option>
-            ))}
-          </select>
+          <div className="flex flex-col flex-1 items-start">
+            <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide px-1 mb-0.5">{t.levelLabel}</span>
+            <select value={level} onChange={e => setLevel(e.target.value)} className="w-full text-sm font-bold bg-indigo-50 border-indigo-200 border-[1.5px] text-indigo-800 rounded-lg px-3 py-1.5 cursor-pointer outline-none">
+              {['Básico', 'Elemental', 'Intermedio', 'Intermedio Alto'].map(l => (
+                <option key={l} value={l}>{l}</option>
+              ))}
+            </select>
+          </div>
         </div>
       </header>
 

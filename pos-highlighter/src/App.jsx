@@ -2389,8 +2389,8 @@ function StructureLegend({ level, lang }) {
   const t = TRANSLATIONS[lang];
   const isBasic = level === 'Básico' || level === 'Elemental';
   const items = isBasic
-    ? ['S', 'V', 'C']
-    : ['S', 'V', 'O', 'A'];
+    ? ['WH', 'S', 'V', 'C']
+    : ['WH', 'S', 'V', 'O', 'A'];
 
   return (
     <div className="mb-4 p-4 bg-slate-50 border border-slate-200 rounded-xl">

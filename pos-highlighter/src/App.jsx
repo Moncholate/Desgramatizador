@@ -2931,9 +2931,11 @@ function App() {
       {/* ══ HEADER ══════════════════════════════════════════ */}
       <header className="flex-shrink-0 bg-white border-b border-gray-200 flex items-center justify-between px-4 py-2.5 shadow-sm z-10">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl flex-shrink-0 bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center shadow-lg shadow-indigo-500/40">
-            <span className="text-white text-base">📝</span>
-          </div>
+          <img
+            src={`${import.meta.env.BASE_URL}pwa-192x192.png`}
+            alt="Desgramatizador"
+            className="w-9 h-9 rounded-lg flex-shrink-0 shadow-md"
+          />
           <div>
             <div className="text-base font-bold text-slate-800 leading-tight">
               {t.appTitle}

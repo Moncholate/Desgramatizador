@@ -2545,9 +2545,13 @@ function MobileBar({
   lang,
 }) {
   const t = TRANSLATIONS[lang];
+  const isBoth = !isManual && autoView === 'both';
+  const [bothTab, setBothTab] = useState('structure');
+
   const showStructure = (isManual && manualView === 'structure')
-    || (!isManual && (autoView === 'structure' || autoView === 'both'));
-  const showPOS = !showStructure;
+    || (!isManual && (autoView === 'structure' || (isBoth && bothTab === 'structure')));
+  const showPOS = (isManual && manualView === 'pos')
+    || (!isManual && (autoView === 'pos' || (isBoth && bothTab === 'pos')));
 
   if (showStructure) {
     const isBasic = level === 'Básico' || level === 'Elemental';
@@ -2555,9 +2559,17 @@ function MobileBar({
 
     return (
       <div className="md:hidden flex-shrink-0 bg-white border-t border-gray-200 z-30 shadow-[0_-2px_14px_rgba(0,0,0,0.08)]">
-        <div className="px-3 pt-1.5 text-xs font-semibold text-slate-400 tracking-wide">
-          {isManual ? `🏗️ ${t.structureModeMobile}` : `📐 ${t.sentenceStructure.toUpperCase()}`}
-        </div>
+        {isBoth && (
+          <div className="flex bg-slate-100 rounded-lg p-0.5 mx-3 mt-1.5 gap-0.5">
+            <button onClick={() => setBothTab('structure')} className={`flex-1 py-1 rounded text-xs font-bold transition-all ${bothTab === 'structure' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500'}`}>📐 {t.sentenceStructure}</button>
+            <button onClick={() => setBothTab('pos')} className={`flex-1 py-1 rounded text-xs font-bold transition-all ${bothTab === 'pos' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500'}`}>📘 {t.partsOfSpeech}</button>
+          </div>
+        )}
+        {!isBoth && (
+          <div className="px-3 pt-1.5 text-xs font-semibold text-slate-400 tracking-wide">
+            {isManual ? `🏗️ ${t.structureModeMobile}` : `📐 ${t.sentenceStructure.toUpperCase()}`}
+          </div>
+        )}
         <div className="flex gap-1.5 px-3 pt-1.5 pb-2.5 overflow-x-auto">
           {items.map(key => {
             const s = STRUCTURE[key];
@@ -2586,9 +2598,17 @@ function MobileBar({
 
   return (
     <div className="md:hidden flex-shrink-0 bg-white border-t border-gray-200 z-30 shadow-[0_-2px_14px_rgba(0,0,0,0.08)]">
-      <div className="px-3 pt-1.5 text-xs font-semibold text-slate-400 tracking-wide">
-        {isManual ? `✏️ ${t.paintModeMobile}` : `📘 ${t.partsOfSpeech.toUpperCase()}`}
-      </div>
+      {isBoth && (
+        <div className="flex bg-slate-100 rounded-lg p-0.5 mx-3 mt-1.5 gap-0.5">
+          <button onClick={() => setBothTab('structure')} className={`flex-1 py-1 rounded text-xs font-bold transition-all ${bothTab === 'structure' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500'}`}>📐 {t.sentenceStructure}</button>
+          <button onClick={() => setBothTab('pos')} className={`flex-1 py-1 rounded text-xs font-bold transition-all ${bothTab === 'pos' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500'}`}>📘 {t.partsOfSpeech}</button>
+        </div>
+      )}
+      {!isBoth && (
+        <div className="px-3 pt-1.5 text-xs font-semibold text-slate-400 tracking-wide">
+          {isManual ? `✏️ ${t.paintModeMobile}` : `📘 ${t.partsOfSpeech.toUpperCase()}`}
+        </div>
+      )}
       <div className="flex gap-1.5 px-3 pt-1.5 pb-2.5 overflow-x-auto">
         {POS_ORDER.map(key => {
           const p = POS[key];

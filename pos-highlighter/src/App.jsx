@@ -3074,8 +3074,8 @@ function App() {
             {isManual && (
               <div className="flex bg-slate-100 rounded-xl p-1 gap-0.5 mb-4 max-w-xs">
                 {[
-                  { key: 'pos', label: t.paintPOS },
                   { key: 'structure', label: t.paintStructure },
+                  { key: 'pos', label: t.paintPOS },
                 ].map(({ key, label }) => {
                   const active = manualView === key;
                   return (

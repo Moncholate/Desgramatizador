@@ -16,7 +16,7 @@ const TRANSLATIONS = {
     loadExample: 'Cargar texto de ejemplo ▾',
     analyze: 'Analizar',
     reanalyze: 'Re-analizar',
-    prepare: 'Preparar',
+    prepare: 'Iniciar Práctica',
     checkAnswers: 'Verificar Respuestas',
     showAnswers: 'Mostrar Respuestas',
     hideAnswers: 'Ocultar Respuestas',
@@ -48,7 +48,7 @@ const TRANSLATIONS = {
     hintAutoAnalysis: 'Escribe o pega texto en inglés, luego haz clic en "Analizar" para resaltar automáticamente cada parte de la oración.',
     placeholderEmpty: 'Ingresa texto arriba o carga un ejemplo para comenzar.',
     placeholderAuto: 'Haz clic en "Analizar" para resaltar las partes de la oración.',
-    placeholderManual: 'Haz clic en "Preparar" para comenzar la práctica.',
+    placeholderManual: 'Haz clic en "Iniciar Práctica" para comenzar.',
     // POS definitions in Spanish
     posDef: {
       noun: 'persona, lugar, cosa o idea',
@@ -89,7 +89,7 @@ const TRANSLATIONS = {
     loadExample: 'Load example text ▾',
     analyze: 'Analyze',
     reanalyze: 'Re-analyze',
-    prepare: 'Prepare',
+    prepare: 'Start Practice',
     checkAnswers: 'Check Answers',
     showAnswers: 'Show Answers',
     hideAnswers: 'Hide Answers',
@@ -121,7 +121,7 @@ const TRANSLATIONS = {
     hintAutoAnalysis: 'Type or paste English text, then click "Analyze" to automatically highlight each part of speech.',
     placeholderEmpty: 'Enter text above or load an example to get started.',
     placeholderAuto: 'Click "Analyze" to highlight parts of speech.',
-    placeholderManual: 'Click "Prepare" to begin practice.',
+    placeholderManual: 'Click "Start Practice" to begin.',
     // POS definitions in English
     posDef: {
       noun: 'person, place, thing, or idea',

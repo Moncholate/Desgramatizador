@@ -225,6 +225,9 @@ const EXAMPLES = [
 const CLAUSE_MARKERS = [
   'because', 'although', 'when', 'if', 'unless', 'while', 'since',
   'before', 'after', 'that', 'which', 'who', 'whom', 'whose', 'where',
+  'though', 'once', 'as', 'until', 'whereas', 'whenever',
+  'even though', 'even if', 'so that', 'in case', 'now that',
+  'as soon as', 'as long as',
 ];
 
 // Question detection helper
@@ -720,7 +723,8 @@ function analyzeSentenceStructure(sentenceText, level) {
     // "If you study hard, you will pass." → C: "If you study hard," | S+V+C of main clause
     const FRONTED_SUBORD_WORDS = [
       'if', 'when', 'because', 'although', 'while', 'before', 'after',
-      'since', 'unless', 'though', 'even', 'as', 'once', 'until',
+      'since', 'unless', 'though', 'as', 'once', 'until', 'whereas',
+      'whenever', 'provided',
     ];
     const firstWordFronted = doc.terms().first().text().toLowerCase().replace(/[,;:.!?]$/, '');
     if (FRONTED_SUBORD_WORDS.includes(firstWordFronted)) {
@@ -1208,18 +1212,20 @@ function analyzeSentenceStructure(sentenceText, level) {
 }
 
 // Coordinating conjunctions — split into equal rows
-const COORD_CONJ = ['and', 'but', 'or', 'so'];
+const COORD_CONJ = ['and', 'but', 'or', 'so', 'yet'];
 
 // Subordinating conjunctions used for fronted-clause detection (Rule 3)
 const SUBORD_CONJ = [
   'when', 'because', 'if', 'although', 'while', 'before', 'after',
-  'until', 'since', 'that', 'who', 'which', 'where', 'though',
-  'even though', 'so that', 'as soon as', 'as long as', 'unless',
+  'until', 'since', 'that', 'who', 'which', 'where', 'though', 'unless',
+  'once', 'as', 'whereas', 'whenever', 'provided',
+  'even though', 'even if', 'so that', 'in case', 'now that',
+  'as soon as', 'as long as',
 ];
 
 // Subordinating conjunctions that introduce a visible separate clause row
 // when both sides have S+V (because, when, although, while…)
-const SUBORD_SPLIT_CONJ = ['because', 'when', 'although', 'while', 'whereas', 'though', 'before', 'after', 'until'];
+const SUBORD_SPLIT_CONJ = ['because', 'when', 'although', 'while', 'whereas', 'though', 'before', 'after', 'until', 'since', 'once', 'whenever', 'even though', 'even if', 'in case', 'now that', 'unless', 'so that'];
 
 // Try to split a sentence at the first clause-level conjunction (coord or subord).
 // Returns { first, conj, second } or null.

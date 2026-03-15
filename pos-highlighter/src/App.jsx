@@ -724,7 +724,7 @@ function analyzeSentenceStructure(sentenceText, level) {
     const FRONTED_SUBORD_WORDS = [
       'if', 'when', 'because', 'although', 'while', 'before', 'after',
       'since', 'unless', 'though', 'as', 'once', 'until', 'whereas',
-      'whenever', 'provided',
+      'whenever', 'provided', 'despite', 'contrary',
     ];
     const firstWordFronted = doc.terms().first().text().toLowerCase().replace(/[,;:.!?]$/, '');
     if (FRONTED_SUBORD_WORDS.includes(firstWordFronted)) {

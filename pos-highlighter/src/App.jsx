@@ -62,7 +62,7 @@ const TRANSLATIONS = {
       modal: 'habilidad / posibilidad',
       auxiliary: 'ayuda al verbo principal',
       wh: 'introduce una pregunta',
-      number: 'numeral / cantidad',
+      number: 'expresa una cantidad o número',
     },
     // Structure definitions in Spanish
     structureDef: {
@@ -138,7 +138,7 @@ const TRANSLATIONS = {
       modal: 'ability / possibility',
       auxiliary: 'helps the main verb',
       wh: 'introduces a question',
-      number: 'numeral / quantity',
+      number: 'expresses quantity or a number',
     },
     // Structure definitions in English
     structureDef: {
@@ -176,12 +176,12 @@ const POS = {
   modal:        { color: '#6366F1', bg: '#E0E7FF', label: 'MOD',  name: 'Modal',        def: 'ability / possibility',         ex: 'can, should, must, might'  },
   auxiliary:    { color: '#EF4444', bg: '#FEE2E2', label: 'AUX',  name: 'Auxiliary',    def: 'helps the main verb',           ex: 'is, have, do, was'         },
   wh:            { color: '#0F766E', bg: '#F0FDFA', label: 'WH',   name: 'Wh- Word',     def: 'introduces a question',         ex: 'what, where, when, why, how' },
-  number:       { color: '#059669', bg: '#D1FAE5', label: 'NUM',  name: 'Number',       def: 'numeral / quantity',            ex: 'one, two, twenty, 100'     },
+  number:       { color: '#6B7280', bg: '#F3F4F6', label: 'NUM',  name: 'Numeral',      def: 'expresses quantity or a number', ex: '2020, three, 42'           },
 };
 
 const POS_ORDER = [
   'noun', 'verb', 'adjective', 'adverb', 'pronoun', 'wh',
-  'preposition', 'conjunction', 'determiner', 'modal', 'auxiliary', 'number',
+  'preposition', 'conjunction', 'determiner', 'number', 'modal', 'auxiliary',
 ];
 
 const STRUCTURE = {
@@ -194,8 +194,8 @@ const STRUCTURE = {
 };
 
 const LEVELS = {
-  'Básico':          ['noun', 'verb', 'adjective', 'determiner', 'pronoun', 'wh', 'preposition', 'adverb', 'modal', 'auxiliary', 'number'],
-  'Elemental':       ['noun', 'verb', 'adjective', 'determiner', 'pronoun', 'wh', 'preposition', 'adverb', 'modal', 'auxiliary', 'number'],
+  'Básico':          ['noun', 'verb', 'adjective', 'determiner', 'pronoun', 'wh', 'preposition', 'adverb', 'modal', 'auxiliary'],
+  'Elemental':       ['noun', 'verb', 'adjective', 'determiner', 'pronoun', 'wh', 'preposition', 'adverb', 'modal', 'auxiliary'],
   'Intermedio':      ['noun', 'verb', 'adjective', 'determiner', 'pronoun', 'wh', 'preposition', 'adverb', 'modal', 'auxiliary', 'conjunction', 'number'],
   'Intermedio Alto': ['noun', 'verb', 'adjective', 'determiner', 'pronoun', 'wh', 'preposition', 'adverb', 'modal', 'auxiliary', 'conjunction', 'number'],
 };
@@ -1539,9 +1539,9 @@ const POS_TAG_RULES = [
   ['pronoun',     ['Pronoun', 'Possessive', 'Personal', 'Reflexive',
                    'Relative', 'Demonstrative', 'Indefinite']],
   ['determiner',  ['Determiner', 'Article']],
-  ['number',      ['Value', 'NumericValue', 'Ordinal', 'Cardinal']],
+  ['number',      ['Value', 'NumericValue', 'Cardinal']],
   ['adverb',      ['Adverb', 'Negative']],
-  ['adjective',   ['Adjective', 'Comparable', 'Superlative']],
+  ['adjective',   ['Adjective', 'Comparable', 'Superlative', 'Ordinal']],
   ['verb',        ['Verb', 'PastTense', 'PresentTense', 'Gerund',
                    'Infinitive', 'Participle', 'Copula']],
   ['noun',        ['Noun', 'Plural', 'ProperNoun', 'Person',
@@ -1563,7 +1563,7 @@ function mapTagsToPos(tagObj) {
 }
 
 // Main tokenizer function
-function tokenizeText(inputText) {
+function tokenizeText(inputText, level = 'Intermedio') {
   const doc = nlp(inputText);
 
   const rawTerms = [];
@@ -1961,6 +1961,13 @@ function tokenizeText(inputText) {
         }
         if (tok.phrasalVerb) break;
       }
+    }
+  }
+
+  // ── Post-processing: absorb NUM into DET at Básico / Elemental levels ────────
+  if (level === 'Básico' || level === 'Elemental') {
+    for (const tok of tokens) {
+      if (!tok.isPunct && tok.pos === 'number') tok.pos = 'determiner';
     }
   }
 
@@ -3016,7 +3023,7 @@ function App() {
     try {
       // Run POS tokenization if showing POS or both
       if (autoView === 'pos' || autoView === 'both') {
-        const result = tokenizeText(text);
+        const result = tokenizeText(text, level);
         setTokens(result);
       }
 
@@ -3043,7 +3050,7 @@ function App() {
     setNlpError(null);
     try {
       // Tokenize the text
-      const result = tokenizeText(text);
+      const result = tokenizeText(text, level);
       setManualTokens(result);
       // Clear previous user tags and answers
       setUserPOSTags({});

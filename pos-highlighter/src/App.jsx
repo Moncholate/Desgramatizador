@@ -1667,8 +1667,8 @@ function tokenizeText(inputText) {
       for (let j = i + 1; j < tokens.length; j++) {
         const nextToken = tokens[j];
 
-        // Skip punctuation and determiners
-        if (nextToken.isPunct || nextToken.pos === 'determiner') {
+        // Skip punctuation, determiners, and pronouns (subjects in inverted questions: "is he playing?")
+        if (nextToken.isPunct || nextToken.pos === 'determiner' || nextToken.pos === 'pronoun') {
           continue;
         }
 
@@ -1691,7 +1691,7 @@ function tokenizeText(inputText) {
         }
 
         // If we hit a noun, adjective, preposition, or adverb, it's NOT an auxiliary
-        if (['noun', 'adjective', 'preposition', 'adverb', 'pronoun'].includes(nextToken.pos)) {
+        if (['noun', 'adjective', 'preposition', 'adverb'].includes(nextToken.pos)) {
           break;
         }
       }

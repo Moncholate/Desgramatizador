@@ -418,11 +418,6 @@ function analyzeSentenceStructure(sentenceText, level) {
         'long','much','many','often','far','old','tall','big',
         'good','well','fast','late','early','hard','loud',
       ]);
-      const WHAT_WHICH_COMPOUNDS_STRUCT = new Set([
-        'time','day','kind','type','sort','year','one',
-        'color','colour','size','age','language','country','city',
-        'sport','food','music','movie','film','book','class','grade','floor',
-      ]);
       const firstWordLower = firstTerm.text.toLowerCase().replace(/[?!.]$/, '');
       if (WH_WORDS.has(firstWordLower)) {
         // Wh-question: WH-word + Auxiliary/Modal + Subject + Main Verb (+ Object/Complement)
@@ -433,10 +428,10 @@ function analyzeSentenceStructure(sentenceText, level) {
         if (termPOS.length > 1) {
           const nextLower = termPOS[1].text.toLowerCase().replace(/[?!.]$/, '');
           const nextPos = termPOS[1].pos;
+          const isNounLike = nextPos === 'noun' || termPOS[1].tags?.includes('Noun') || termPOS[1].tags?.includes('Singular') || termPOS[1].tags?.includes('Plural');
           const shouldMerge =
             (firstWordLower === 'how' && HOW_COMPOUNDS_STRUCT.has(nextLower)) ||
-            ((firstWordLower === 'what' || firstWordLower === 'which') && WHAT_WHICH_COMPOUNDS_STRUCT.has(nextLower)) ||
-            (firstWordLower === 'whose' && nextPos === 'noun');
+            ((firstWordLower === 'what' || firstWordLower === 'which' || firstWordLower === 'whose') && isNounLike);
           if (shouldMerge) {
             whText = firstTerm.text + ' ' + termPOS[1].text;
             auxSearchStart = 2;
@@ -444,12 +439,10 @@ function analyzeSentenceStructure(sentenceText, level) {
         }
         components.push({ type: 'WH', text: whText, position: 0 });
 
-        // 1b. Check for "of + noun" prepositional phrase after "what kind/type/sort"
-        const OF_CLASSIFIERS = new Set(['kind','type','sort']);
+        // 1b. Check for "of + noun(s)" prepositional phrase after "what/which + noun"
         if (
           auxSearchStart === 2 &&
           (firstWordLower === 'what' || firstWordLower === 'which') &&
-          OF_CLASSIFIERS.has(termPOS[1]?.text.toLowerCase()) &&
           termPOS[auxSearchStart]?.text.toLowerCase() === 'of'
         ) {
           // Collect "of + noun(s)" until we hit aux/modal/verb/punct
@@ -1694,11 +1687,6 @@ function tokenizeText(inputText) {
     'long','much','many','often','far','old','tall','big',
     'good','well','fast','late','early','hard','loud',
   ]);
-  const WHAT_WHICH_COMPOUNDS = new Set([
-    'time','day','kind','type','sort','year','one',
-    'color','colour','size','age','language','country','city',
-    'sport','food','music','movie','film','book','class','grade','floor',
-  ]);
   if (isQuestion(inputText)) {
     for (let i = 0; i < tokens.length - 1; i++) {
       const tok = tokens[i];
@@ -1712,8 +1700,7 @@ function tokenizeText(inputText) {
       const nextLower = next.text.toLowerCase();
       const shouldMerge =
         (lower === 'how' && HOW_COMPOUNDS.has(nextLower)) ||
-        ((lower === 'what' || lower === 'which') && WHAT_WHICH_COMPOUNDS.has(nextLower)) ||
-        (lower === 'whose' && next.pos === 'noun');
+        ((lower === 'what' || lower === 'which' || lower === 'whose') && next.pos === 'noun');
       if (shouldMerge) {
         tok.text = tok.text + ' ' + next.text;
         tokens.splice(j, 1);

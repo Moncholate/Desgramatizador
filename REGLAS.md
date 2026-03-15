@@ -329,3 +329,100 @@ El token compuesto es una única unidad clickeable. El alumno hace clic una vez 
 - Antes de análisis estructural, todas las contracciones se expanden (`expandContractions()`)
 - Esto permite que compromise detecte "is/are/do" como verbos reales
 - La expansión es interna — el display siempre muestra el texto original
+
+---
+
+### REGLA 15 — Auxiliar "be" vs. verbo copular
+
+*(Ya implementada — ver código)*
+
+El auxiliar "be" (am/is/are/was/were/been/being) se clasifica como:
+- **AUX** cuando va seguido de V-ing (progresivo) o V-participle (pasivo)
+- **V** (copular) cuando va seguido de sustantivo, adjetivo, preposición o adverbio
+
+---
+
+### REGLA 16 — "have to" como unidad auxiliar
+
+"have to" expresa obligación y es enseñado en AEF como una unidad junto a must/should/can (Libro 1 File 7B, Libro 2 File 1B). Se trata como chunk auxiliar, NO como verbo principal + infinitivo.
+
+#### Tres usos de "have"
+
+| Caso | Patrón | Clasificación |
+|---|---|---|
+| CASE 1 | have + participio pasado | AUX (tiempo perfecto) |
+| CASE 2 | have/has/had + to + infinitivo | AUX chunk "have to" (obligación) |
+| CASE 3 | have/has/had + sustantivo/pronombre | V (verbo principal, posesión) |
+
+**CASE 1 — perfecto:**
+```
+"I have played football."   → [AUX: have] [V: played] [N: football]
+"She has eaten already."    → [AUX: has] [V: eaten] [ADV: already]
+"Have you finished?"        → [AUX: Have] [PRO: you] [V: finished]
+```
+
+**CASE 2 — obligación (token fusionado):**
+```
+"I have to play football."     → [PRO: I] [AUX: have to] [V: play] [N: football]
+"She has to study tonight."    → [PRO: She] [AUX: has to] [V: study] [ADV: tonight]
+"Do you have to work tomorrow?"→ [AUX: Do] [PRO: you] [AUX: have to] [V: work] [N: tomorrow]
+```
+
+**CASE 3 — posesión:**
+```
+"I have a car."     → [PRO: I] [V: have] [DET: a] [N: car]
+"She has brothers." → [PRO: She] [V: has] [N: brothers]
+```
+
+#### Modo estructura
+
+**CASE 2:** "have to + verbo principal" van juntos en el bloque V:
+```
+"I have to play football."       → [S: I] [V: have to play] [C: football]
+"She has to study every night."  → [S: She] [V: has to study] [A: every night]
+"Do you have to work tomorrow?"  → [V: Do] [S: you] [V: have to work] [A: tomorrow] ❓
+```
+
+**CASE 1:** ambos van en bloque V (ya cubierto por Regla 8):
+```
+"I have played football."  → [S: I] [V: have played] [C: football]
+```
+
+**CASE 3:** have = verbo principal, bloque V normal:
+```
+"I have a car."  → [S: I] [V: have] [C: a car]
+```
+
+#### Semi-modales relacionados (misma lógica CASE 2)
+
+| Expresión | Ejemplo | Resultado POS |
+|---|---|---|
+| used to | "We used to live there." | [AUX: used to] [V: live] |
+| be going to | "She is going to study." | [AUX: is going to] [V: study] |
+| be able to | "He was able to finish." | [AUX: was able to] [V: finish] |
+
+Referencia AEF: Starter File 6B (be going to), Libro 1 File 9B (be able to), Libro 2 File 6A (used to).
+
+#### Ejemplos completos
+
+```
+"I have to play football after school."
+POS:       [PRO:I] [AUX:have to] [V:play] [N:football] [PREP:after] [N:school]
+Estructura: [S: I] [V: have to play] [C: football] [A: after school]
+
+"She doesn't have to work on Sundays."
+POS:       [PRO:She] [AUX:does] [ADV:n't] [AUX:have to] [V:work] [PREP:on] [N:Sundays]
+Estructura: [S: She] [V: doesn't have to work] [A: on Sundays]
+
+"Do they have to wear a uniform?"
+POS:       [AUX:Do] [PRO:they] [AUX:have to] [V:wear] [DET:a] [N:uniform]
+Estructura: [V: Do] [S: they] [V: have to wear] [C: a uniform] ❓
+
+"I have a lot of homework." (CASE 3 — posesión)
+POS:       [PRO:I] [V:have] [DET:a] [N:lot] [PREP:of] [N:homework]
+Estructura: [S: I] [V: have] [C: a lot of homework]
+
+"We used to live in Valparaíso."
+POS:       [PRO:We] [AUX:used to] [V:live] [PREP:in] [N:Valparaíso]
+Estructura: [S: We] [V: used to live] [A: in Valparaíso]
+```

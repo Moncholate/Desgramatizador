@@ -547,6 +547,19 @@ function analyzeSentenceStructure(sentenceText, level) {
               }
             }
 
+            // Rule 16: check if "have/has/had + to" precedes the main verb
+            // e.g., "What does she have to study?" → main V = "have to study"
+            const HAVE_SET_WH = new Set(['have', 'has', 'had']);
+            if (mainVerbIndex >= 2) {
+              const tMinus2 = termPOS[mainVerbIndex - 2];
+              const tMinus1 = termPOS[mainVerbIndex - 1];
+              if (tMinus2 && tMinus1 &&
+                  HAVE_SET_WH.has(tMinus2.text.toLowerCase()) &&
+                  tMinus1.text.toLowerCase() === 'to') {
+                verbText = tMinus2.text + ' ' + tMinus1.text + ' ' + verbText;
+              }
+            }
+
             // Main verb component (may include "to + verb")
             components.push({ type: 'V', text: verbText, position: mainVerbIndex, isMainVerb: true });
 
@@ -651,6 +664,19 @@ function analyzeSentenceStructure(sentenceText, level) {
               // Include "to + verb" as part of the main verb
               verbEndIndex = mainVerbIndex + 2;
               verbText = termPOS.slice(mainVerbIndex, verbEndIndex + 1).map(t => t.text).join(' ');
+            }
+          }
+
+          // Rule 16: check if "have/has/had + to" precedes the main verb
+          // e.g., "Do you have to work?" → main V = "have to work"
+          const HAVE_SET_YN = new Set(['have', 'has', 'had']);
+          if (mainVerbIndex >= 2) {
+            const tMinus2 = termPOS[mainVerbIndex - 2];
+            const tMinus1 = termPOS[mainVerbIndex - 1];
+            if (tMinus2 && tMinus1 &&
+                HAVE_SET_YN.has(tMinus2.text.toLowerCase()) &&
+                tMinus1.text.toLowerCase() === 'to') {
+              verbText = tMinus2.text + ' ' + tMinus1.text + ' ' + verbText;
             }
           }
 
@@ -897,6 +923,15 @@ function analyzeSentenceStructure(sentenceText, level) {
           }
         }
       }
+    }
+
+    // Rule 16: extend verb phrase for "have/has/had + to + verb" (obligation)
+    // In case compromise only detected "have/has/had" but the pattern is "have to play"
+    const HAVE_VP_SET = new Set(['have', 'has', 'had']);
+    if (HAVE_VP_SET.has(verbPhrase.trim().toLowerCase())) {
+      const haveToRe = new RegExp(`\\b${verbPhrase.trim()}\\s+to\\s+(\\w+)`, 'i');
+      const m = sentenceText.match(haveToRe);
+      if (m) verbPhrase = verbPhrase.trim() + ' to ' + m[1];
     }
 
     // Find where the verb appears in the sentence
@@ -1603,6 +1638,76 @@ function tokenizeText(inputText) {
     if (!isParticipial) tok.pos = 'verb'; // copula, not progressive/passive
   }
 
+  // ── Post-processing: RULE 16 — classify have/has/had (perfect vs obligation vs possession) ──
+  const HAVE_VERBS_R16 = new Set(['have', 'has', 'had']);
+  for (let i = 0; i < tokens.length; i++) {
+    const tok = tokens[i];
+    if (tok.isPunct || !HAVE_VERBS_R16.has(tok.text.toLowerCase())) continue;
+    if (tok.pos !== 'auxiliary') continue;
+
+    // Find immediate next non-punct token (to check for CASE 2 "to")
+    let j = i + 1;
+    while (j < tokens.length && tokens[j].isPunct) j++;
+    if (j >= tokens.length) { tok.pos = 'verb'; continue; }
+    const next = tokens[j];
+
+    // CASE 2: have + to + infinitive → merge as single auxiliary chunk "have to"
+    if (next.text.toLowerCase() === 'to') {
+      let k = j + 1;
+      while (k < tokens.length && tokens[k].isPunct) k++;
+      const afterTo = k < tokens.length ? tokens[k] : null;
+      if (afterTo && (afterTo.pos === 'verb' || afterTo.nlpTags.some(t => ['Verb', 'Infinitive'].includes(t)))) {
+        tok.text = tok.text + ' ' + next.text;
+        tok.post = next.post || '';
+        tokens.splice(j, 1); // remove standalone "to" token
+      }
+      continue;
+    }
+
+    // Distinguish CASE 1 (perfect: have + past participle) vs CASE 3 (possession: have + noun)
+    // If next non-punct token is a subject pronoun/noun, look past it for a participle
+    // This handles perfect questions: "Have you eaten?" → have(AUX) + you(subject) + eaten(V)
+    if (next.pos === 'pronoun' || next.pos === 'noun') {
+      let k = j + 1;
+      while (k < tokens.length && (tokens[k].isPunct || tokens[k].pos === 'adverb')) k++;
+      if (k < tokens.length) {
+        const afterSubject = tokens[k];
+        const asLow = afterSubject.text.toLowerCase();
+        const isParticipleAhead =
+          afterSubject.pos === 'verb' ||
+          afterSubject.nlpTags.includes('Participle') ||
+          afterSubject.nlpTags.includes('PastTense') ||
+          asLow.endsWith('ed') ||
+          asLow.endsWith('en');
+        if (isParticipleAhead) continue; // CASE 1: perfect question → keep as auxiliary
+      }
+      // No participle found → CASE 3
+      tok.pos = 'verb';
+      continue;
+    }
+
+    // Skip adverbs to find the content word (e.g., "have never played" → skip "never")
+    let k = i + 1;
+    while (k < tokens.length && (tokens[k].isPunct || tokens[k].pos === 'adverb')) k++;
+    if (k >= tokens.length) { tok.pos = 'verb'; continue; }
+    const nextContent = tokens[k];
+
+    // CASE 1: have + past participle → keep as auxiliary (perfect tense)
+    const cLow = nextContent.text.toLowerCase();
+    const isParticipial =
+      nextContent.pos === 'verb' ||
+      nextContent.pos === 'auxiliary' || // have been...
+      nextContent.nlpTags.includes('Participle') ||
+      nextContent.nlpTags.includes('PastTense') ||
+      nextContent.nlpTags.includes('Gerund') ||
+      cLow.endsWith('ed') ||
+      cLow.endsWith('en');
+    if (isParticipial) continue;
+
+    // CASE 3: have + nominal → main verb (possession)
+    tok.pos = 'verb';
+  }
+
   // Context-aware correction for questions in POS tagging
   // Check if this is a question
   if (isQuestion(inputText)) {
@@ -1646,11 +1751,17 @@ function tokenizeText(inputText) {
         }
       }
 
-      // Convert the word right after the subject to a verb
+      // Convert the main verb after the subject to 'verb'
+      // Skip any additional auxiliary chunks (e.g., "have to" compound) to find the actual verb
       if (lastSubjectIndex !== -1 && lastSubjectIndex + 1 < tokens.length) {
-        const nextToken = tokens[lastSubjectIndex + 1];
-        if (!nextToken.isPunct) {
-          nextToken.pos = 'verb';
+        let candidateIdx = lastSubjectIndex + 1;
+        while (candidateIdx < tokens.length &&
+               !tokens[candidateIdx].isPunct &&
+               tokens[candidateIdx].pos === 'auxiliary') {
+          candidateIdx++;
+        }
+        if (candidateIdx < tokens.length && !tokens[candidateIdx].isPunct) {
+          tokens[candidateIdx].pos = 'verb';
         }
       }
     }
@@ -1700,6 +1811,28 @@ function tokenizeText(inputText) {
       if (!isAuxiliary) {
         token.pos = 'verb';
       }
+    }
+  }
+
+  // ── Post-processing: "used to + verb" → single auxiliary chunk ───────────────
+  for (let i = 0; i < tokens.length; i++) {
+    const tok = tokens[i];
+    if (tok.isPunct || tok.pos !== 'verb') continue;
+    if (tok.text.toLowerCase() !== 'used') continue;
+
+    let j = i + 1;
+    while (j < tokens.length && tokens[j].isPunct) j++;
+    if (j >= tokens.length || tokens[j].text.toLowerCase() !== 'to') continue;
+
+    let k = j + 1;
+    while (k < tokens.length && tokens[k].isPunct) k++;
+    if (k >= tokens.length) continue;
+    const afterTo = tokens[k];
+    if (afterTo.pos === 'verb' || afterTo.nlpTags.some(t => ['Verb', 'Infinitive'].includes(t))) {
+      tok.pos = 'auxiliary';
+      tok.text = tok.text + ' ' + tokens[j].text;
+      tok.post = tokens[j].post || '';
+      tokens.splice(j, 1);
     }
   }
 

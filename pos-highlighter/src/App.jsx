@@ -73,6 +73,9 @@ const TRANSLATIONS = {
       O: 'recibe la acción: ¿qué? / ¿a quién?',
       A: '¿cuándo? / ¿dónde? / ¿cómo?',
     },
+    // Structure warnings
+    complexWarning: 'Oración compleja (múltiples cláusulas o más de 15 palabras)',
+    questionNotAvailable: 'Pregunta — análisis de estructura no disponible para este tipo de oración.',
     // PWA banners
     installBannerMsg: '📲 Instala la app en tu celular para usarla sin internet',
     installBannerBtn: 'Instalar',
@@ -146,6 +149,9 @@ const TRANSLATIONS = {
       O: 'receives the action: what? / whom?',
       A: 'when? / where? / how?',
     },
+    // Structure warnings
+    complexWarning: 'Complex sentence (multiple clauses or 15+ words)',
+    questionNotAvailable: 'Question — structure analysis not available for this sentence type.',
     // PWA banners
     installBannerMsg: '📲 Install this app on your phone for offline use',
     installBannerBtn: 'Install',
@@ -1958,6 +1964,20 @@ function tokenizeText(inputText) {
     }
   }
 
+  // ── Post-processing: QUANT_DETS — tag quantifiers as determiner before nouns ─
+  const QUANT_DETS = new Set(['some','any','each','every','either','neither','both']);
+  for (let i = 0; i < tokens.length; i++) {
+    const tok = tokens[i];
+    if (tok.isPunct || !QUANT_DETS.has(tok.text.toLowerCase())) continue;
+    let j = i + 1;
+    while (j < tokens.length && tokens[j].isPunct) j++;
+    if (j >= tokens.length) continue;
+    const next = tokens[j];
+    if (next.pos === 'noun' || next.pos === 'adjective' || next.pos === 'determiner') {
+      tok.pos = 'determiner';
+    }
+  }
+
   return tokens;
 }
 
@@ -2399,7 +2419,7 @@ function StructureBlock({ type, text, isAuxiliary, isMainVerb, formal }) {
   if (isAuxiliary || isMainVerb) {
     return (
       <div
-        className="inline-block px-3 py-2 rounded-lg mr-2 mb-2 border-2"
+        className="block w-full md:w-auto md:inline-block px-3 py-2 rounded-lg mr-2 mb-2 border-2"
         style={{
           borderColor: s.color,
           background: s.bg,
@@ -2423,7 +2443,7 @@ function StructureBlock({ type, text, isAuxiliary, isMainVerb, formal }) {
   // Regular component (no special verb handling)
   return (
     <div
-      className="inline-block px-3 py-2 rounded-lg mr-2 mb-2 border-2"
+      className="block w-full md:w-auto md:inline-block px-3 py-2 rounded-lg mr-2 mb-2 border-2"
       style={{
         borderColor: s.color,
         background: s.bg,
@@ -2484,7 +2504,8 @@ function ClauseRow({ components, isQuestion }) {
   );
 }
 
-function SentenceStructure({ sentence }) {
+function SentenceStructure({ sentence, lang = 'es' }) {
+  const t = TRANSLATIONS[lang] || TRANSLATIONS.es;
   const rows = sentence.rows || [{ components: sentence.components || [] }];
   const hasContent = rows.some(r => !r.isConjunction && r.components && r.components.length > 0);
 
@@ -2493,7 +2514,7 @@ function SentenceStructure({ sentence }) {
     return (
       <div className="mb-4 p-3 rounded-lg border border-blue-200 bg-blue-50">
         <div className="text-sm text-blue-700 italic mb-1">{sentence.text}</div>
-        <div className="text-xs text-blue-600">❓ Question — structure analysis not available for this sentence type.</div>
+        <div className="text-xs text-blue-600">❓ {t.questionNotAvailable}</div>
       </div>
     );
   }
@@ -2512,7 +2533,7 @@ function SentenceStructure({ sentence }) {
     <div className="mb-4 p-3 rounded-lg border border-slate-200 bg-white">
       {sentence.isComplex && (
         <div className="mb-2 px-2 py-1 rounded bg-amber-50 border border-amber-200 text-xs text-amber-800">
-          ⚠️ Complex sentence (multiple clauses or 15+ words)
+          ⚠️ {t.complexWarning}
         </div>
       )}
       <div className="flex flex-col gap-2">
@@ -3670,7 +3691,7 @@ function App() {
                 {(autoView === 'structure' || autoView === 'both') && structureData.length > 0 && (
                   <div>
                     {structureData.map(sentence => (
-                      <SentenceStructure key={sentence.id} sentence={sentence} />
+                      <SentenceStructure key={sentence.id} sentence={sentence} lang={lang} />
                     ))}
                   </div>
                 )}

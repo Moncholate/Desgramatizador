@@ -2914,6 +2914,7 @@ function App() {
   const [showAnswers, setShowAnswers] = useState(false);
   const [answerChecked, setAnswerChecked] = useState(false);
   const [highlightTextarea, setHighlightTextarea] = useState(false);
+  const [bannerExpanded, setBannerExpanded] = useState(false);
 
   const unlocked = LEVELS[level];
   const isManual = mode === 'manual';
@@ -3299,10 +3300,10 @@ function App() {
                     <button
                       key={key}
                       onClick={() => switchMode(key)}
-                      className={`px-4 py-2 rounded-lg border-none text-sm font-semibold transition-all ${
+                      className={`px-4 py-2 rounded-lg border-none text-sm transition-all ${
                         active
-                          ? 'bg-white text-indigo-800 shadow-sm font-bold'
-                          : 'bg-transparent text-slate-600 font-medium'
+                          ? 'bg-white text-indigo-600 shadow-md font-semibold'
+                          : 'bg-transparent text-gray-500 font-medium'
                       }`}
                     >
                       {icon} {label}
@@ -3382,25 +3383,37 @@ function App() {
             )}
 
             {/* ── Hint banner ── */}
-            <div
-              className={`border rounded-xl px-3.5 py-2.5 mb-4 text-xs leading-relaxed ${
-                isManual
-                  ? 'bg-orange-50 border-orange-200 text-orange-900'
-                  : 'bg-blue-50 border-blue-200 text-blue-900'
-              }`}
-            >
-              {isManual ? (
+            {(() => {
+              const bannerColor = isManual
+                ? 'bg-orange-50 border-orange-200 text-orange-900'
+                : 'bg-blue-50 border-blue-200 text-blue-900';
+              const bannerIcon = isManual ? '✏️' : '⚡';
+              const bannerTitle = isManual ? t.manualPractice : t.autoAnalysis;
+              const bannerFull = isManual
+                ? `${manualView === 'pos' ? t.hintManualPOS : t.hintManualStructure} ${t.hintCheckAnswers}`
+                : t.hintAutoAnalysis;
+              return (
                 <>
-                  <strong>✏️ {t.manualPractice}:</strong>{' '}
-                  {manualView === 'pos' ? t.hintManualPOS : t.hintManualStructure}{' '}
-                  {t.hintCheckAnswers}
+                  {/* Mobile: collapsible */}
+                  <div
+                    className={`md:hidden border rounded-xl px-3.5 py-2.5 mb-4 text-xs leading-relaxed cursor-pointer select-none ${bannerColor}`}
+                    onClick={() => setBannerExpanded(v => !v)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span><strong>{bannerIcon} {bannerTitle}</strong> — toca para {bannerExpanded ? 'ocultar' : 'ver instrucciones'}</span>
+                      <span className={`ml-2 transition-transform duration-200 ${bannerExpanded ? 'rotate-180' : ''}`}>▼</span>
+                    </div>
+                    {bannerExpanded && (
+                      <div className="mt-2">{bannerFull}</div>
+                    )}
+                  </div>
+                  {/* Desktop: always expanded */}
+                  <div className={`hidden md:block border rounded-xl px-3.5 py-2.5 mb-4 text-xs leading-relaxed ${bannerColor}`}>
+                    <strong>{bannerIcon} {bannerTitle}:</strong> {bannerFull}
+                  </div>
                 </>
-              ) : (
-                <>
-                  <strong>⚡ {t.autoAnalysis}:</strong> {t.hintAutoAnalysis}
-                </>
-              )}
-            </div>
+              );
+            })()}
 
             {/* ── Text input card ── */}
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 mb-3.5">
@@ -3432,25 +3445,21 @@ function App() {
                   <button
                     disabled={!canAnalyze}
                     onClick={handleAnalyze}
-                    className={`px-5 py-2.5 rounded-xl border-none text-sm font-bold text-white transition-all ${
+                    className={`px-8 py-3 rounded-xl text-sm font-semibold text-white shadow-md transition-all ${
                       canAnalyze
-                        ? 'bg-gradient-to-br from-indigo-500 to-indigo-700 shadow-lg shadow-indigo-500/35 cursor-pointer hover:shadow-xl'
-                        : 'bg-indigo-200 cursor-not-allowed'
+                        ? 'bg-indigo-600 cursor-pointer hover:bg-indigo-700'
+                        : 'bg-indigo-300 cursor-not-allowed'
                     }`}
                   >
-                    {analyzed ? `⚡ ${t.reanalyze}` : `⚡ ${t.analyze}`}
+                    {analyzed ? t.reanalyze : t.analyze}
                   </button>
 
                   {/* Show / Hide Labels toggle */}
                   <button
                     onClick={() => setShowLabels(v => !v)}
-                    className={`px-4 py-2.5 rounded-xl border-[1.5px] text-sm font-semibold transition-all flex items-center gap-1.5 ${
-                      showLabels
-                        ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
-                        : 'bg-white text-slate-600 border-slate-200'
-                    }`}
+                    className="px-6 py-3 rounded-xl border border-gray-300 bg-white text-gray-600 text-sm font-medium transition-all hover:bg-gray-50"
                   >
-                    {showLabels ? `🏷️ ${t.hideLabels}` : `👁️ ${t.showLabels}`}
+                    {showLabels ? t.hideLabels : t.showLabels}
                   </button>
                 </>
               ) : (
@@ -3460,13 +3469,13 @@ function App() {
                     <button
                       disabled={!canAnalyze}
                       onClick={handlePrepareManual}
-                      className={`px-5 py-2.5 rounded-xl border-none text-sm font-bold text-white transition-all ${
+                      className={`px-8 py-3 rounded-xl text-sm font-semibold text-white shadow-md transition-all ${
                         canAnalyze
-                          ? 'bg-gradient-to-br from-orange-500 to-orange-700 shadow-lg shadow-orange-500/35 cursor-pointer hover:shadow-xl'
-                          : 'bg-orange-200 cursor-not-allowed'
+                          ? 'bg-indigo-600 cursor-pointer hover:bg-indigo-700'
+                          : 'bg-indigo-300 cursor-not-allowed'
                       }`}
                     >
-                      ✏️ {t.prepare}
+                      {t.prepare}
                     </button>
                   )}
 

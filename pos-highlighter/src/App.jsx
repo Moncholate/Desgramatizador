@@ -414,16 +414,29 @@ function analyzeSentenceStructure(sentenceText, level) {
 
       // Check if it's a Wh-question (starts with wh-word)
       const WH_WORDS = new Set(['what','where','when','why','who','which','how','whose','whom']);
+      const HOW_COMPOUNDS_STRUCT = new Set([
+        'long','much','many','often','far','old','tall','big',
+        'good','well','fast','late','early','hard','loud',
+      ]);
       const firstWordLower = firstTerm.text.toLowerCase().replace(/[?!.]$/, '');
       if (WH_WORDS.has(firstWordLower)) {
         // Wh-question: WH-word + Auxiliary/Modal + Subject + Main Verb (+ Object/Complement)
 
-        // 1. Wh-word → WH block (its own structure type per Rule 13)
-        components.push({ type: 'WH', text: firstTerm.text, position: 0 });
+        // 1. Wh-word → WH block; merge "how + adj/adv" into single WH text
+        let whText = firstTerm.text;
+        let auxSearchStart = 1;
+        if (firstWordLower === 'how' && termPOS.length > 1) {
+          const nextLower = termPOS[1].text.toLowerCase().replace(/[?!.]$/, '');
+          if (HOW_COMPOUNDS_STRUCT.has(nextLower)) {
+            whText = firstTerm.text + ' ' + termPOS[1].text;
+            auxSearchStart = 2;
+          }
+        }
+        components.push({ type: 'WH', text: whText, position: 0 });
 
         // 2. Find auxiliary or modal (should be second word typically)
         let auxIndex = -1;
-        for (let i = 1; i < termPOS.length; i++) {
+        for (let i = auxSearchStart; i < termPOS.length; i++) {
           if (termPOS[i].pos === 'auxiliary' || termPOS[i].pos === 'modal') {
             auxIndex = i;
             break;

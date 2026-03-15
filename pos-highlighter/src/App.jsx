@@ -444,6 +444,30 @@ function analyzeSentenceStructure(sentenceText, level) {
         }
         components.push({ type: 'WH', text: whText, position: 0 });
 
+        // 1b. Check for "of + noun" prepositional phrase after "what kind/type/sort"
+        const OF_CLASSIFIERS = new Set(['kind','type','sort']);
+        if (
+          auxSearchStart === 2 &&
+          (firstWordLower === 'what' || firstWordLower === 'which') &&
+          OF_CLASSIFIERS.has(termPOS[1]?.text.toLowerCase()) &&
+          termPOS[auxSearchStart]?.text.toLowerCase() === 'of'
+        ) {
+          // Collect "of + noun(s)" until we hit aux/modal/verb/punct
+          let phraseEnd = auxSearchStart + 1;
+          while (
+            phraseEnd < termPOS.length &&
+            termPOS[phraseEnd].pos !== 'auxiliary' &&
+            termPOS[phraseEnd].pos !== 'modal' &&
+            termPOS[phraseEnd].pos !== 'verb' &&
+            !termPOS[phraseEnd].isPunct
+          ) { phraseEnd++; }
+          if (phraseEnd > auxSearchStart + 1) {
+            const ofText = termPOS.slice(auxSearchStart, phraseEnd).map(t => t.text).join(' ');
+            components.push({ type: 'C', text: ofText, position: auxSearchStart });
+            auxSearchStart = phraseEnd;
+          }
+        }
+
         // 2. Find auxiliary or modal (should be second word typically)
         let auxIndex = -1;
         for (let i = auxSearchStart; i < termPOS.length; i++) {

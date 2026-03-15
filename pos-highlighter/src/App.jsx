@@ -1577,20 +1577,29 @@ function tokenizeText(inputText) {
     const tok = tokens[i];
     if (tok.isPunct || tok.pos !== 'auxiliary') continue;
     if (!BE_VERBS.has(tok.text.toLowerCase())) continue;
-    // Look ahead (up to 5 tokens) for the first verb token
+    // Look ahead (up to 6 tokens) for a participial form
+    // compromise sometimes tags -ing words as 'adjective', so we check text too
     let nextVerb = null;
-    for (let j = i + 1; j < tokens.length && j <= i + 5; j++) {
-      if (tokens[j].isPunct) continue;
-      if (tokens[j].pos === 'verb') { nextVerb = tokens[j]; break; }
+    for (let j = i + 1; j < tokens.length && j <= i + 6; j++) {
+      const t = tokens[j];
+      if (t.isPunct) continue;
+      const tLow = t.text.toLowerCase();
+      if (t.pos === 'verb') { nextVerb = t; break; }
+      // -ing classified as adjective (compromise quirk with gerunds in questions)
+      if (tLow.endsWith('ing') && t.pos !== 'auxiliary' && t.pos !== 'modal') { nextVerb = t; break; }
+      // past participle classified as adjective but tagged Participle by NLP
+      if (t.nlpTags.includes('Participle') && t.pos === 'adjective') { nextVerb = t; break; }
     }
     if (!nextVerb) {
-      tok.pos = 'verb'; // no following verb → copula ("She is a teacher")
+      tok.pos = 'verb'; // no following participial → copula ("She is a teacher")
       continue;
     }
     const isParticipial =
       nextVerb.nlpTags.includes('Gerund') ||
       nextVerb.nlpTags.includes('Participle') ||
-      nextVerb.text.toLowerCase().endsWith('ing');
+      nextVerb.text.toLowerCase().endsWith('ing') ||
+      nextVerb.text.toLowerCase().endsWith('ed') ||
+      nextVerb.text.toLowerCase().endsWith('en');
     if (!isParticipial) tok.pos = 'verb'; // copula, not progressive/passive
   }
 

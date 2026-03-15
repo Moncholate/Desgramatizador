@@ -1559,14 +1559,40 @@ function tokenizeText(inputText) {
     }
     // Apply CONTRACTION_SPLITS: mark token with splitParts so WordToken renders two colored parts
     const split = CONTRACTION_SPLITS.get(t.text.toLowerCase());
+    const nlpTags = !isPunct ? Object.keys(t.tags || {}).filter(k => (t.tags||{})[k] !== false) : [];
     if (split && !isPunct) {
       // Use first part's POS as the token's own pos (for stats counting etc.)
       pos = split[0].pos;
       unrecognized = false;
-      return { id: i, text: t.text, pre: t.pre || '', post: t.post || '', pos, isPunct, unrecognized, splitParts: split };
+      return { id: i, text: t.text, pre: t.pre || '', post: t.post || '', pos, isPunct, unrecognized, splitParts: split, nlpTags };
     }
-    return { id: i, text: t.text, pre: t.pre || '', post: t.post || '', pos, isPunct, unrecognized };
+    return { id: i, text: t.text, pre: t.pre || '', post: t.post || '', pos, isPunct, unrecognized, nlpTags };
   });
+
+  // ── Post-processing: differentiate auxiliary vs. copular "be" verbs ──────────
+  // be + V-ing (progressive) or be + V-participle (passive) → auxiliary
+  // be + noun / adjective / preposition / adverb / pronoun → verb (copula)
+  const BE_VERBS = new Set(['am','is','are','was','were','been','being']);
+  for (let i = 0; i < tokens.length; i++) {
+    const tok = tokens[i];
+    if (tok.isPunct || tok.pos !== 'auxiliary') continue;
+    if (!BE_VERBS.has(tok.text.toLowerCase())) continue;
+    // Look ahead (up to 5 tokens) for the first verb token
+    let nextVerb = null;
+    for (let j = i + 1; j < tokens.length && j <= i + 5; j++) {
+      if (tokens[j].isPunct) continue;
+      if (tokens[j].pos === 'verb') { nextVerb = tokens[j]; break; }
+    }
+    if (!nextVerb) {
+      tok.pos = 'verb'; // no following verb → copula ("She is a teacher")
+      continue;
+    }
+    const isParticipial =
+      nextVerb.nlpTags.includes('Gerund') ||
+      nextVerb.nlpTags.includes('Participle') ||
+      nextVerb.text.toLowerCase().endsWith('ing');
+    if (!isParticipial) tok.pos = 'verb'; // copula, not progressive/passive
+  }
 
   // Context-aware correction for questions in POS tagging
   // Check if this is a question

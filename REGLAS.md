@@ -17,7 +17,7 @@
 
 ## Categorías POS (Partes de la Oración)
 
-La app usa **11 categorías** con colores del esquema Okabe-Ito (accesible para daltonismo):
+La app usa **12 categorías** con colores del esquema Okabe-Ito (accesible para daltonismo):
 
 | Clave | Label | Color texto | Color fondo | Descripción |
 |---|---|---|---|---|
@@ -30,18 +30,20 @@ La app usa **11 categorías** con colores del esquema Okabe-Ito (accesible para 
 | `preposition` | PREP | `#10B981` | `#ECFDF5` | Preposición |
 | `conjunction` | CONJ | `#3B82F6` | `#DBEAFE` | Conjunción |
 | `determiner` | DET | `#64748B` | `#F1F5F9` | Determinante |
+| `number` | NUM | `#6B7280` | `#F3F4F6` | Numeral *(Regla 17)* |
 | `modal` | MOD | `#6366F1` | `#E0E7FF` | Modal |
 | `auxiliary` | AUX | `#EF4444` | `#FEE2E2` | Auxiliar |
-| `number` | NUM | `#059669` | `#D1FAE5` | Número |
 
 ### Niveles CEFR — categorías desbloqueadas
 
 | Nivel | Categorías visibles |
 |---|---|
-| Básico (A1) | N, V, ADJ, DET, PRO, WH, PREP, ADV, MOD, AUX, NUM |
-| Elemental (A2) | N, V, ADJ, DET, PRO, WH, PREP, ADV, MOD, AUX, NUM |
-| Intermedio (B1) | todo lo anterior + CONJ |
-| Intermedio Alto (B2) | todo lo anterior + CONJ |
+| Básico (A1) | N, V, ADJ, DET, PRO, WH, PREP, ADV, MOD, AUX |
+| Elemental (A2) | N, V, ADJ, DET, PRO, WH, PREP, ADV, MOD, AUX |
+| Intermedio (B1) | todo lo anterior + CONJ + **NUM** |
+| Intermedio Alto (B2) | todo lo anterior + CONJ + **NUM** |
+
+> En Básico/Elemental los números cardinales se absorben como `DET` y NUM aparece 🔒 en la leyenda.
 
 ---
 
@@ -425,4 +427,59 @@ Estructura: [S: I] [V: have] [C: a lot of homework]
 "We used to live in Valparaíso."
 POS:       [PRO:We] [AUX:used to] [V:live] [PREP:in] [N:Valparaíso]
 Estructura: [S: We] [V: used to live] [A: in Valparaíso]
+```
+
+---
+
+### REGLA 17 — NUM (Numeral) como 12ª categoría POS
+
+Los numerales cardinales son una categoría propia a partir de **Intermedio (B1)**. En Básico/Elemental se absorben como `DET` para simplificar el análisis en A1–A2.
+
+#### Color
+| Clave | Label | Color | Fondo |
+|---|---|---|---|
+| `number` | NUM | `#6B7280` | `#F3F4F6` |
+
+#### Qué se etiqueta como NUM
+
+| ✅ Etiquetar como NUM | ❌ No etiquetar como NUM |
+|---|---|
+| Cardinales escritos: *one, two, three, hundred, thousand* | Ordinales (*first, second, third, last, next*) → **ADJ** |
+| Dígitos: *1, 2, 42, 100, 1000* | Adverbios multiplicativos (*once, twice*) → **ADV** |
+| Años y fechas: *2020, 1999, 1492* | *Many, few, several, much* → **DET** (cuantificadores) |
+| Fracciones: *half, quarter* (como cantidad) | *One* usado como pronombre → **PRO** |
+| Expresiones numéricas: *11:00, 3.5, 50%* | |
+
+#### Lógica de detección (compromise.js)
+
+```
+if (#Ordinal)                          → adjective
+else if (#Cardinal | #NumericValue | #Value) → number
+```
+
+#### Comportamiento por nivel
+
+| Nivel | Comportamiento |
+|---|---|
+| Básico / Elemental | Tokens `number` → convertidos a `determiner` en tokenizeText(text, level) |
+| Intermedio / Intermedio Alto | Tokens `number` se muestran con color NUM propio |
+
+#### Modo estructura
+
+NUM sigue las mismas reglas de bloque que DET — pertenece al bloque de su sustantivo.
+
+```
+"Working from home has become very common since 2020."
+→ [S: Working from home] [V: has become] [C: very common since 2020]
+                                                              ↑ 2020 = NUM dentro del bloque C
+
+"Many people prefer it."
+→ [S: Many people]   ← "Many" = DET (cuantificador, no NUM)
+```
+
+#### Posición en la leyenda
+
+```
+Noun / Verb / Adjective / Adverb / Pronoun / Wh- Word /
+Preposition / Conjunction / Determiner / Numeral / Modal / Auxiliary
 ```

@@ -3266,7 +3266,7 @@ function App() {
             <img
               src={`${import.meta.env.BASE_URL}web-app-manifest-192x192.png`}
               alt="Desgramatizador"
-              className="w-11 h-11 md:w-9 md:h-9 rounded-xl flex-shrink-0"
+              className="w-11 h-11 md:w-9 md:h-9 rounded-[22%] flex-shrink-0"
             />
             <div>
               <div className="text-lg md:text-base font-bold text-slate-800 leading-tight">

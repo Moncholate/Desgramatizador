@@ -3210,6 +3210,17 @@ function App() {
 
   const isMobileDevice = /android|iphone|ipad|ipod/i.test(navigator.userAgent);
 
+  // Grammar HUB: escuchar cambio de idioma vía postMessage
+  useEffect(() => {
+    const handler = (e) => {
+      if (e.data?.type === 'GRAMMAR_HUB_LANG' && (e.data.lang === 'es' || e.data.lang === 'en')) {
+        setLang(e.data.lang);
+      }
+    };
+    window.addEventListener('message', handler);
+    return () => window.removeEventListener('message', handler);
+  }, []);
+
   useEffect(() => {
     const onBeforeInstall = e => {
       e.preventDefault();

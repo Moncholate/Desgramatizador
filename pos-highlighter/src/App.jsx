@@ -3272,7 +3272,7 @@ function App() {
               <div className="text-lg md:text-base font-bold text-slate-800 leading-tight">
                 {t.appTitle}
               </div>
-              <div className="text-xs text-slate-400">Descompón oraciones y descubre sus partes</div>
+              <div className="text-xs text-slate-400">Descubre el ADN de tus oraciones.</div>
             </div>
           </div>
 

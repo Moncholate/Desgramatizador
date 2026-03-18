@@ -2941,7 +2941,7 @@ function MobileBar({
 
 function App() {
   const [lang, setLang] = useState('es'); // 'es' | 'en'
-  const [fromHub, setFromHub] = useState(false);
+  const [fromHub, setFromHub] = useState(() => window.self !== window.top);
   const [level, setLevel] = useState('Básico');
   const [mode, setMode] = useState('auto');
   const [autoView, setAutoView] = useState('structure'); // 'pos' | 'structure' | 'both'

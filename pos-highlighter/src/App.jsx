@@ -2941,6 +2941,7 @@ function MobileBar({
 
 function App() {
   const [lang, setLang] = useState('es'); // 'es' | 'en'
+  const [fromHub, setFromHub] = useState(false);
   const [level, setLevel] = useState('Básico');
   const [mode, setMode] = useState('auto');
   const [autoView, setAutoView] = useState('structure'); // 'pos' | 'structure' | 'both'
@@ -3221,9 +3222,11 @@ function App() {
     const handler = (e) => {
       if (e.data?.type === 'GRAMMAR_HUB_LANG' && (e.data.lang === 'es' || e.data.lang === 'en')) {
         setLang(e.data.lang);
+        setFromHub(true);
       }
       if (e.data?.type === 'GRAMMAR_HUB_LEVEL' && levelMap[e.data.level]) {
         setLevel(levelMap[e.data.level]);
+        setFromHub(true);
       }
     };
     window.addEventListener('message', handler);
@@ -3297,7 +3300,24 @@ function App() {
           </div>
 
           {/* Controls: inline on md+, hidden on mobile */}
-          <div className="hidden md:flex items-center gap-1.5">
+          {!fromHub && (
+            <div className="hidden md:flex items-center gap-1.5">
+              <select value={level} onChange={e => setLevel(e.target.value)} className="px-1.5 py-1 border border-slate-200 rounded-lg text-xs font-medium text-gray-600 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300 cursor-pointer" title={t.levelLabel}>
+                {['Básico', 'Elemental', 'Intermedio', 'Intermedio Alto'].map(l => (
+                  <option key={l} value={l}>{l}</option>
+                ))}
+              </select>
+              <div className="flex bg-slate-100 border border-slate-200 rounded-lg p-0.5">
+                <button onClick={() => setLang('es')} className={`px-2 py-0.5 rounded text-xs font-bold transition-all ${lang === 'es' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500 hover:text-slate-700'}`} title="Español">ES</button>
+                <button onClick={() => setLang('en')} className={`px-2 py-0.5 rounded text-xs font-bold transition-all ${lang === 'en' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500 hover:text-slate-700'}`} title="English">EN</button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Row 2: controls on mobile only */}
+        {!fromHub && (
+          <div className="flex md:hidden items-center justify-end gap-1.5 mt-2">
             <select value={level} onChange={e => setLevel(e.target.value)} className="px-1.5 py-1 border border-slate-200 rounded-lg text-xs font-medium text-gray-600 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300 cursor-pointer" title={t.levelLabel}>
               {['Básico', 'Elemental', 'Intermedio', 'Intermedio Alto'].map(l => (
                 <option key={l} value={l}>{l}</option>
@@ -3308,20 +3328,7 @@ function App() {
               <button onClick={() => setLang('en')} className={`px-2 py-0.5 rounded text-xs font-bold transition-all ${lang === 'en' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500 hover:text-slate-700'}`} title="English">EN</button>
             </div>
           </div>
-        </div>
-
-        {/* Row 2: controls on mobile only */}
-        <div className="flex md:hidden items-center justify-end gap-1.5 mt-2">
-          <select value={level} onChange={e => setLevel(e.target.value)} className="px-1.5 py-1 border border-slate-200 rounded-lg text-xs font-medium text-gray-600 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300 cursor-pointer" title={t.levelLabel}>
-            {['Básico', 'Elemental', 'Intermedio', 'Intermedio Alto'].map(l => (
-              <option key={l} value={l}>{l}</option>
-            ))}
-          </select>
-          <div className="flex bg-slate-100 border border-slate-200 rounded-lg p-0.5">
-            <button onClick={() => setLang('es')} className={`px-2 py-0.5 rounded text-xs font-bold transition-all ${lang === 'es' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500 hover:text-slate-700'}`} title="Español">ES</button>
-            <button onClick={() => setLang('en')} className={`px-2 py-0.5 rounded text-xs font-bold transition-all ${lang === 'en' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500 hover:text-slate-700'}`} title="English">EN</button>
-          </div>
-        </div>
+        )}
       </header>
 
       {/* ══ BODY ════════════════════════════════════════════ */}
